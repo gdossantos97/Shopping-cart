@@ -33,7 +33,9 @@ const useDataApi = (initialUrl, initialData) => {
         const result = await axios(url);
         console.log("FETCH FROM URl");
         if (!didCancel) {
-          dispatch({ type: "FETCH_SUCCESS", payload: result.data });
+          // result.data.data
+          // first data is from axios object, second data is from strapi object
+          dispatch({ type: "FETCH_SUCCESS", payload: result.data.data });
         }
       } catch (error) {
         if (!didCancel) {
@@ -90,9 +92,9 @@ const Products = (props) => {
   } = ReactBootstrap;
   //  Fetch Data
   const { Fragment, useState, useEffect, useReducer } = React;
-  const [query, setQuery] = useState("http://localhost:1337/products");
+  const [query, setQuery] = useState("http://localhost:1337/api/products");
   const [{ data, isLoading, isError }, doFetch] = useDataApi(
-    "http://localhost:1337/products",
+    "http://localhost:1337/api/products",
     {
       data: [],
     }
@@ -165,8 +167,16 @@ const Products = (props) => {
     console.log(`total updated to ${newTotal}`);
     return newTotal;
   };
-  // TODO: implement the restockProducts function
-  const restockProducts = (url) => {};
+
+  // This restocks products 
+  const restockProducts = (url) => {
+    doFetch(url);
+    let newItems = data.map((item) => {
+      let { name, country, cost, instock } = item;
+      return { name, country, cost, instock };
+    });
+    setItems([...items, ...newItems]);
+  };
 
   return (
     <Container>
@@ -206,3 +216,4 @@ const Products = (props) => {
 };
 // ========================================
 ReactDOM.render(<Products />, document.getElementById("root"));
+
